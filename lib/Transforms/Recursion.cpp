@@ -106,7 +106,7 @@ void OptimizeTailRecursionPass::runOnOperation() {
                 }
               }
               memref::LoadOp output = builder.create<memref::LoadOp>(builder.getUnknownLoc(), inputMem, resultIndex);
-              yieldValues[0].replaceAllUsesWith(output.getResult()); //如果最后有arg0就没事不用修改，如果没有的话就需要减小一
+              yieldValues[0].replaceAllUsesWith(output.getResult());
           }
         }
   
@@ -177,9 +177,7 @@ void derecursion(func::FuncOp func){
   scf::IfOp ifoptemp;
 
   for(auto &op: func.front()){
-    if (auto constantOp = dyn_cast<ConstantOp>(&op)) {//寻找后面的递归，检测是否相关，如果相关
-      // 这是第一个ConstantOp，你可以在这里进行相应的处理
-      // constantOp就是第一个ConstantOp操作
+    if (auto constantOp = dyn_cast<ConstantOp>(&op)) {
         constantOps.push_back(&op);
     }
     if (isa<IfOp>(&op)) {
@@ -245,7 +243,7 @@ void derecursion(func::FuncOp func){
     std::string calleeName{call.getCallee().data()};
     if (funcName == calleeName) {
       callVect.push_back(call);
-      if(call.getOperation()->hasAttr("carry_value")){//可以设置为属性，这样子减去2就是所需的
+      if(call.getOperation()->hasAttr("carry_value")){
         haveCarryValue=true;
         llvm::outs() << "have a carry " << "\n";
       }
@@ -411,7 +409,7 @@ void derecursion(func::FuncOp func){
           }
  
         //begin 
-        //第一个是sp，第二个是while，第三个是return
+
         Region &elseRegion = ifOp.getElseRegion();
         Operation *callTempOp;
         int64_t state_base_num = 0;
@@ -621,7 +619,6 @@ void derecursion(func::FuncOp func){
           //                       {spIf,cmpiNe}));
           // }
 
-          //当前的case，检测当前case的func.call，是否
           auto &casePosOp = StateSwitch.getCaseRegions()[i].front().front();
           bool findReady = false;
 
@@ -699,7 +696,7 @@ void derecursion(func::FuncOp func){
         auto &casePosOp = StateSwitch.getCaseRegions()[i].front().front();
         
         // for(Value operand: case2call[i].back()->getOperands()){
-        //   if(!dyn_cast<func::CallOp>(operand.getDefiningOp()))//之后可以看看是否可以删除  还需要移动一些相关的语句
+        //   if(!dyn_cast<func::CallOp>(operand.getDefiningOp()))
         //     operand.getDefiningOp()->moveBefore(&casePosOp);
         // }
         if(case2call[i].size()==2){
@@ -720,7 +717,7 @@ void derecursion(func::FuncOp func){
             otherCaseStoreOp->replaceUsesOfWith(case2call[i].front()->getResult(0), args[2]);
           }
         }
-        //如果有carry_value  posy
+
         // assert(case2call[i].front()->getNumOperands() == case2call[i].back()->getNumOperands());
         // for(int j=0; j < case2call[i].front()->getNumOperands(); j++){
         //   int pos = -1;
